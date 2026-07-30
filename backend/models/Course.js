@@ -1,34 +1,27 @@
 const mongoose = require("mongoose");
 
-const studentSchema = new mongoose.Schema(
+const courseSchema = new mongoose.Schema(
 {
-    studentId: {
+    courseId: {
         type: String,
         required: true,
         unique: true,
         trim: true
     },
 
-    studentName: {
-        type: String,
-        required: true,
-        trim: true
-    },
-
-    studentEmail: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
-    },
-
-    studentPhone: {
+    courseName: {
         type: String,
         required: true,
         trim: true
     },
 
     department: {
+        type: String,
+        required: true,
+        trim: true
+    },
+
+    duration: {
         type: String,
         required: true,
         trim: true
@@ -39,4 +32,4 @@ const studentSchema = new mongoose.Schema(
     timestamps: true
 });
 
-module.exports = mongoose.model("Student", studentSchema);
+module.exports = mongoose.model("Course", courseSchema);

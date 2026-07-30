@@ -1,58 +1,60 @@
-// Login Form
+//const API = "http://localhost:5000/api/auth/login";
 
-const form = document.getElementById("loginForm");
+// GitHub Codespaces
+const API = "https://fluffy-train-q5pq6pp54rv2xr5p.github.dev/api/auth/login";
 
-const username = document.getElementById("username");
+const loginForm = document.getElementById("loginForm");
 
-const password = document.getElementById("password");
-
-const togglePassword = document.getElementById("togglePassword");
-
-// Show Password
-
-togglePassword.addEventListener("click", () => {
-
-    if(password.type==="password"){
-
-        password.type="text";
-
-        togglePassword.classList.replace("fa-eye","fa-eye-slash");
-
-    }else{
-
-        password.type="password";
-
-        togglePassword.classList.replace("fa-eye-slash","fa-eye");
-
-    }
-
-});
-
-// Login Validation
-
-form.addEventListener("submit",(e)=>{
+loginForm.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
-    if(
+    const email = document.getElementById("email").value.trim();
 
-        username.value==="admin"
+    const password = document.getElementById("password").value.trim();
 
-        &&
+    try {
 
-        password.value==="admin123"
+        const response = await fetch(API, {
 
-    ){
+            method: "POST",
 
-        alert("Login Successful!");
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-        window.location.href="dashboard.html";
+            body: JSON.stringify({
+                email,
+                password
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            alert(data.message);
+
+            return;
+
+        }
+
+        localStorage.setItem("token", data.token);
+
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        alert("Login Successful");
+
+        window.location.href = "dashboard.html";
 
     }
 
-    else{
+    catch (error) {
 
-        alert("Invalid Username or Password");
+        console.error(error);
+
+        alert("Unable to connect to server");
 
     }
 

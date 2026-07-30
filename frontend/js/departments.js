@@ -1,56 +1,120 @@
 /* ==========================================
-   Departments Page JavaScript
-   Vertex Institute of Technology
+   Departments - MongoDB Version
 ========================================== */
 
-// Highlight department cards on click
+const API = "http://localhost:5000/api/departments";
 
-const departmentCards = document.querySelectorAll(".department-box");
+// GitHub Codespaces
+// const API="https://YOUR-CODESPACE-5000.app.github.dev/api/departments";
 
-departmentCards.forEach(card => {
+const token = localStorage.getItem("token");
 
-    card.addEventListener("click", () => {
-
-        departmentCards.forEach(item => {
-
-            item.classList.remove("selected");
-
-        });
-
-        card.classList.add("selected");
-
-    });
-
-});
-
-// Simple Search (Optional)
+const container = document.getElementById("departmentContainer");
 
 const searchBox = document.getElementById("departmentSearch");
 
-if (searchBox) {
+// --------------------
+// Load Departments
+// --------------------
 
-    searchBox.addEventListener("keyup", function () {
+async function loadDepartments() {
 
-        const value = this.value.toLowerCase();
+    try {
 
-        departmentCards.forEach(card => {
+        const response = await fetch(API, {
 
-            const text = card.innerText.toLowerCase();
+            headers: {
 
-            if (text.includes(value)) {
-
-                card.style.display = "block";
-
-            } else {
-
-                card.style.display = "none";
+                Authorization: `Bearer ${token}`
 
             }
 
         });
 
+        const departments = await response.json();
+
+        displayDepartments(departments);
+
+    }
+
+    catch (err) {
+
+        console.log(err);
+
+    }
+
+}
+
+loadDepartments();
+
+// --------------------
+// Display
+// --------------------
+
+function displayDepartments(departments) {
+
+    container.innerHTML = "";
+
+    departments.forEach(department => {
+
+        container.innerHTML += `
+
+        <div class="department-box">
+
+            <i class="fa-solid fa-building"></i>
+
+            <h2>${department.departmentName}</h2>
+
+            <p>
+
+                <strong>HOD:</strong>
+
+                ${department.hod}
+
+            </p>
+
+            <p>
+
+                Department ID:
+
+                ${department.departmentId}
+
+            </p>
+
+        </div>
+
+        `;
+
     });
 
 }
 
-console.log("Departments Page Loaded Successfully");
+// --------------------
+// Search
+// --------------------
+
+searchBox.addEventListener("keyup", async () => {
+
+    const response = await fetch(API, {
+
+        headers: {
+
+            Authorization: `Bearer ${token}`
+
+        }
+
+    });
+
+    const departments = await response.json();
+
+    const value = searchBox.value.toLowerCase();
+
+    const filtered = departments.filter(department =>
+
+        department.departmentName.toLowerCase().includes(value)
+
+    );
+
+    displayDepartments(filtered);
+
+});

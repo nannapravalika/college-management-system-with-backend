@@ -1,135 +1,267 @@
-const form=document.getElementById("studentForm");
+const form = document.getElementById("studentForm");
+const table = document.querySelector("#studentTable tbody");
+const search = document.getElementById("searchStudent");
 
-const table=document.querySelector("#studentTable tbody");
+// Change this to your Codespaces URL if needed
+const API_URL = "http://localhost:5000/api/students";
 
-const search=document.getElementById("searchStudent");
+const token = localStorage.getItem("token");
 
-let students=JSON.parse(localStorage.getItem("students")) || [];
+// Load students when page opens
+loadStudents();
 
-function displayStudents(list){
+// ------------------------
+// Get Students
+// ------------------------
 
-table.innerHTML="";
+async function loadStudents() {
 
-list.forEach((student,index)=>{
+    try {
 
-table.innerHTML+=`
+        const response = await fetch(API_URL, {
 
-<tr>
+            headers: {
 
-<td>${student.id}</td>
+                Authorization: `Bearer ${token}`
 
-<td>${student.name}</td>
+            }
 
-<td>${student.email}</td>
+        });
 
-<td>${student.phone}</td>
+        const students = await response.json();
 
-<td>${student.department}</td>
+        displayStudents(students);
 
-<td>
+    }
 
-<button class="edit-btn" onclick="editStudent(${index})">
+    catch (error) {
 
-Edit
+        console.error(error);
 
-</button>
+    }
 
-<button class="delete-btn" onclick="deleteStudent(${index})">
+}
 
-Delete
+// ------------------------
+// Display Students
+// ------------------------
 
-</button>
+function displayStudents(students) {
 
-</td>
+    table.innerHTML = "";
 
-</tr>
+    students.forEach(student => {
 
-`;
+        table.innerHTML += `
+
+        <tr>
+
+            <td>${student.studentId}</td>
+
+            <td>${student.studentName}</td>
+
+            <td>${student.studentEmail}</td>
+
+            <td>${student.studentPhone}</td>
+
+            <td>${student.department}</td>
+
+            <td>
+
+                <button
+                    class="edit-btn"
+                    onclick="editStudent('${student._id}')">
+
+                    Edit
+
+                </button>
+
+                <button
+                    class="delete-btn"
+                    onclick="deleteStudent('${student._id}')">
+
+                    Delete
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+// ------------------------
+// Add Student
+// ------------------------
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const student = {
+
+        studentId: studentId.value,
+
+        studentName: studentName.value,
+
+        studentEmail: studentEmail.value,
+
+        studentPhone: studentPhone.value,
+
+        department: department.value
+
+    };
+
+    try {
+
+        await fetch(API_URL, {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type": "application/json",
+
+                Authorization: `Bearer ${token}`
+
+            },
+
+            body: JSON.stringify(student)
+
+        });
+
+        form.reset();
+
+        loadStudents();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+    }
 
 });
 
-}
+// ------------------------
+// Delete Student
+// ------------------------
 
-displayStudents(students);
+async function deleteStudent(id) {
 
-form.addEventListener("submit",(e)=>{
+    if (!confirm("Delete Student?")) return;
 
-e.preventDefault();
+    try {
 
-const student={
+        await fetch(`${API_URL}/${id}`, {
 
-id:studentId.value,
+            method: "DELETE",
 
-name:studentName.value,
+            headers: {
 
-email:studentEmail.value,
+                Authorization: `Bearer ${token}`
 
-phone:studentPhone.value,
+            }
 
-department:department.value
+        });
 
-};
+        loadStudents();
 
-students.push(student);
+    }
 
-localStorage.setItem("students",JSON.stringify(students));
+    catch (error) {
 
-displayStudents(students);
+        console.error(error);
 
-form.reset();
-
-});
-
-function deleteStudent(index){
-
-if(confirm("Delete Student?")){
-
-students.splice(index,1);
-
-localStorage.setItem("students",JSON.stringify(students));
-
-displayStudents(students);
+    }
 
 }
 
+// ------------------------
+// Edit Student
+// ------------------------
+
+async function editStudent(id) {
+
+    try {
+
+        const response = await fetch(`${API_URL}/${id}`, {
+
+            headers: {
+
+                Authorization: `Bearer ${token}`
+
+            }
+
+        });
+
+        const student = await response.json();
+
+        studentId.value = student.studentId;
+
+        studentName.value = student.studentName;
+
+        studentEmail.value = student.studentEmail;
+
+        studentPhone.value = student.studentPhone;
+
+        department.value = student.department;
+
+        await deleteStudent(id);
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+    }
+
 }
 
-function editStudent(index){
+// ------------------------
+// Search Students
+// ------------------------
 
-const s=students[index];
+search.addEventListener("keyup", async () => {
 
-studentId.value=s.id;
+    try {
 
-studentName.value=s.name;
+        const response = await fetch(API_URL, {
 
-studentEmail.value=s.email;
+            headers: {
 
-studentPhone.value=s.phone;
+                Authorization: `Bearer ${token}`
 
-department.value=s.department;
+            }
 
-students.splice(index,1);
+        });
 
-localStorage.setItem("students",JSON.stringify(students));
+        const students = await response.json();
 
-displayStudents(students);
+        const value = search.value.toLowerCase();
 
-}
+        const filtered = students.filter(student =>
 
-search.addEventListener("keyup",()=>{
+            student.studentName.toLowerCase().includes(value) ||
 
-const value=search.value.toLowerCase();
+            student.studentId.toLowerCase().includes(value)
 
-const filtered=students.filter(student=>
+        );
 
-student.name.toLowerCase().includes(value)
+        displayStudents(filtered);
 
-||
+    }
 
-student.id.toLowerCase().includes(value)
+    catch (error) {
 
-);
+        console.error(error);
 
-displayStudents(filtered);
+    }
 
 });

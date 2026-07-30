@@ -2,17 +2,26 @@ const Student = require("../models/Student");
 
 // Get all students
 exports.getStudents = async (req, res) => {
+
     try {
+
         const students = await Student.find().sort({ createdAt: -1 });
-        res.json(students);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+
+        res.status(200).json(students);
+
+    } catch (error) {
+
+        res.status(500).json({ message: error.message });
+
     }
+
 };
 
-// Get one student
+// Get single student
 exports.getStudent = async (req, res) => {
+
     try {
+
         const student = await Student.findById(req.params.id);
 
         if (!student) {
@@ -23,11 +32,14 @@ exports.getStudent = async (req, res) => {
 
         res.json(student);
 
-    } catch (err) {
+    } catch (error) {
+
         res.status(500).json({
-            message: err.message
+            message: error.message
         });
+
     }
+
 };
 
 // Create student
@@ -35,14 +47,16 @@ exports.createStudent = async (req, res) => {
 
     try {
 
-        const student = await Student.create(req.body);
+        const newStudent = new Student(req.body);
 
-        res.status(201).json(student);
+        const savedStudent = await newStudent.save();
 
-    } catch (err) {
+        res.status(201).json(savedStudent);
+
+    } catch (error) {
 
         res.status(500).json({
-            message: err.message
+            message: error.message
         });
 
     }
@@ -54,18 +68,22 @@ exports.updateStudent = async (req, res) => {
 
     try {
 
-        const student = await Student.findByIdAndUpdate(
+        const updatedStudent = await Student.findByIdAndUpdate(
+
             req.params.id,
+
             req.body,
+
             { new: true }
+
         );
 
-        res.json(student);
+        res.json(updatedStudent);
 
-    } catch (err) {
+    } catch (error) {
 
         res.status(500).json({
-            message: err.message
+            message: error.message
         });
 
     }
@@ -80,13 +98,13 @@ exports.deleteStudent = async (req, res) => {
         await Student.findByIdAndDelete(req.params.id);
 
         res.json({
-            message: "Student Deleted Successfully"
+            message: "Student deleted successfully"
         });
 
-    } catch (err) {
+    } catch (error) {
 
         res.status(500).json({
-            message: err.message
+            message: error.message
         });
 
     }

@@ -29,3 +29,12 @@ app.use("/api/auth", authRoutes);
 const studentRoutes = require("./routes/studentRoutes");
 
 app.use("/api/students", studentRoutes);
+const departmentRoutes = require("./routes/departmentRoutes");
+
+app.use("/api/departments", departmentRoutes);
+const courseRoutes = require("./routes/courseRoutes");
+
+app.use("/api/courses", courseRoutes);
+const dashboardRoutes = require("./routes/dashboardRoutes");
+
+app.use("/api/dashboard", dashboardRoutes);
