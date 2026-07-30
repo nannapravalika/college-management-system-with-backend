@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Courses | Vertex Institute</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<!-- Sidebar -->
+
+<aside class="sidebar">
+
+<div class="sidebar-logo">
+
+<i class="fa-solid fa-graduation-cap"></i>
+
+<h2>Vertex Institute</h2>
+
+</div>
+
+<ul>
+
+<li>
+
+<a href="dashboard.html">
+
+<i class="fa-solid fa-house"></i>
+
+Dashboard
+
+</a>
+
+</li>
+
+<li>
+
+<a href="students.html">
+
+<i class="fa-solid fa-user-graduate"></i>
+
+Students
+
+</a>
+
+</li>
+
+<li class="active">
+
+<a href="courses.html">
+
+<i class="fa-solid fa-book-open"></i>
+
+Courses
+
+</a>
+
+</li>
+
+<li>
+
+<a href="departments.html">
+
+<i class="fa-solid fa-building"></i>
+
+Departments
+
+</a>
+
+</li>
+
+<li>
+
+<a href="../index.html">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</aside>
+
+<!-- Main -->
+
+<main class="main-content">
+
+<h1>Course Management</h1>
+
+<div class="form-container">
+
+<h2>Add Course</h2>
+
+<form id="courseForm">
+
+<input
+type="text"
+id="courseCode"
+placeholder="Course Code"
+required>
+
+<input
+type="text"
+id="courseName"
+placeholder="Course Name"
+required>
+
+<input
+type="text"
+id="courseFaculty"
+placeholder="Faculty Name"
+required>
+
+<input
+type="number"
+id="courseCredits"
+placeholder="Credits"
+required>
+
+<button
+class="btn-primary"
+type="submit">
+
+Add Course
+
+</button>
+
+</form>
+
+</div>
+
+<div class="search-box">
+
+<input
+type="text"
+id="searchCourse"
+placeholder="Search Course">
+
+</div>
+
+<div class="table-section">
+
+<table id="courseTable">
+
+<thead>
+
+<tr>
+
+<th>Code</th>
+
+<th>Course</th>
+
+<th>Faculty</th>
+
+<th>Credits</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+</main>
+
+</div>
+
+<script src="../js/courses.js"></script>
+
+</body>
+
+</html>
