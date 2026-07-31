@@ -1,9 +1,36 @@
-//const API = "http://localhost:5000/api/auth/login";
-
-// GitHub Codespaces
-const API = "https://fluffy-train-q5pq6pp54rv2xr5p.github.dev/api/auth/login";
+const API = `${BASE_URL}/auth/login`;
 
 const loginForm = document.getElementById("loginForm");
+
+const togglePassword = document.getElementById("togglePassword");
+
+if (togglePassword) {
+
+    togglePassword.addEventListener("click", () => {
+
+        const password = document.getElementById("password");
+
+        if (password.type === "password") {
+
+            password.type = "text";
+
+            togglePassword.classList.remove("fa-eye");
+
+            togglePassword.classList.add("fa-eye-slash");
+
+        } else {
+
+            password.type = "password";
+
+            togglePassword.classList.remove("fa-eye-slash");
+
+            togglePassword.classList.add("fa-eye");
+
+        }
+
+    });
+
+}
 
 loginForm.addEventListener("submit", async (e) => {
 
@@ -20,12 +47,16 @@ loginForm.addEventListener("submit", async (e) => {
             method: "POST",
 
             headers: {
+
                 "Content-Type": "application/json"
+
             },
 
             body: JSON.stringify({
+
                 email,
                 password
+
             })
 
         });
@@ -34,7 +65,7 @@ loginForm.addEventListener("submit", async (e) => {
 
         if (!response.ok) {
 
-            alert(data.message);
+            alert(data.message || "Invalid Email or Password");
 
             return;
 

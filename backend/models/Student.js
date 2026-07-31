@@ -29,11 +29,16 @@ const studentSchema = new mongoose.Schema(
     },
 
     department: {
-        type: String,
-        required: true,
-        trim: true
-    }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Department",
+        required: true
+    },
 
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+        required: true
+    }
 },
 {
     timestamps: true

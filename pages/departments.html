@@ -4,9 +4,10 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Students | Vertex Institute</title>
+<title>Departments | Vertex Institute</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
@@ -47,7 +48,7 @@ Dashboard
 
 </li>
 
-<li class="active">
+<li>
 
 <a href="students.html">
 
@@ -63,7 +64,7 @@ Students
 
 <a href="courses.html">
 
-<i class="fa-solid fa-book"></i>
+<i class="fa-solid fa-book-open"></i>
 
 Courses
 
@@ -71,7 +72,7 @@ Courses
 
 </li>
 
-<li>
+<li class="active">
 
 <a href="departments.html">
 
@@ -99,65 +100,48 @@ Logout
 
 </aside>
 
-<!-- Main -->
+<!-- Main Content -->
 
 <main class="main-content">
 
-<h1>Student Management</h1>
+<h1>Department Management</h1>
 
-<!-- Student Form -->
+<!-- Add Department -->
 
 <div class="form-container">
 
-<h2>Add Student</h2>
+<h2>Add Department</h2>
 
-<form id="studentForm">
-
-<input
-type="text"
-id="studentId"
-placeholder="Student ID"
-required>
+<form id="departmentForm">
 
 <input
 type="text"
-id="studentName"
-placeholder="Student Name"
-required>
-
-<input
-type="email"
-id="studentEmail"
-placeholder="Email"
+id="departmentName"
+placeholder="Department Name"
 required>
 
 <input
 type="text"
-id="studentPhone"
-placeholder="Phone Number"
+id="departmentCode"
+placeholder="Department Code"
 required>
 
-<select id="department">
+<input
+type="text"
+id="hod"
+placeholder="Head of Department"
+required>
 
-<option value="">Select Department</option>
-
-<option>CSE</option>
-
-<option>ECE</option>
-
-<option>Mechanical</option>
-
-<option>Civil</option>
-
-<option>MBA</option>
-
-</select>
+<textarea
+id="description"
+placeholder="Department Description"
+required></textarea>
 
 <button
 class="btn-primary"
 type="submit">
 
-Add Student
+Save Department
 
 </button>
 
@@ -171,42 +155,16 @@ Add Student
 
 <input
 type="text"
-id="searchStudent"
-placeholder="Search Student">
+id="departmentSearch"
+placeholder="Search Department">
 
 </div>
 
-<!-- Student Table -->
+<!-- Department Cards -->
 
-<div class="table-section">
-
-<table id="studentTable">
-
-<thead>
-
-<tr>
-
-<th>ID</th>
-
-<th>Name</th>
-
-<th>Email</th>
-
-<th>Phone</th>
-
-<th>Department</th>
-
-<th>Actions</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-</tbody>
-
-</table>
+<div
+class="department-container"
+id="departmentContainer">
 
 </div>
 
@@ -214,7 +172,9 @@ placeholder="Search Student">
 
 </div>
 
-<script src="../js/students.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/departments.js"></script>
+<script src="../js/logout.js"></script>
 
 </body>
 

@@ -2,17 +2,19 @@ const form = document.getElementById("studentForm");
 const table = document.querySelector("#studentTable tbody");
 const search = document.getElementById("searchStudent");
 
-// Change this to your Codespaces URL if needed
-const API_URL = "http://localhost:5000/api/students";
-
+const API_URL = `${BASE_URL}/students`;
 const token = localStorage.getItem("token");
 
-// Load students when page opens
-loadStudents();
+// Redirect if not logged in
+if (!token) {
+    window.location.href = "login.html";
+}
 
-// ------------------------
-// Get Students
-// ------------------------
+let editingId = null;
+
+// =========================
+// Load Students
+// =========================
 
 async function loadStudents() {
 
@@ -21,9 +23,7 @@ async function loadStudents() {
         const response = await fetch(API_URL, {
 
             headers: {
-
                 Authorization: `Bearer ${token}`
-
             }
 
         });
@@ -38,17 +38,33 @@ async function loadStudents() {
 
         console.error(error);
 
+        alert("Unable to load students.");
+
     }
 
 }
 
-// ------------------------
+loadStudents();
+
+// =========================
 // Display Students
-// ------------------------
+// =========================
 
 function displayStudents(students) {
 
     table.innerHTML = "";
+
+    if (students.length === 0) {
+
+        table.innerHTML = `
+        <tr>
+            <td colspan="6">No Students Found</td>
+        </tr>
+        `;
+
+        return;
+
+    }
 
     students.forEach(student => {
 
@@ -94,9 +110,9 @@ function displayStudents(students) {
 
 }
 
-// ------------------------
-// Add Student
-// ------------------------
+// =========================
+// Add / Update Student
+// =========================
 
 form.addEventListener("submit", async (e) => {
 
@@ -104,13 +120,13 @@ form.addEventListener("submit", async (e) => {
 
     const student = {
 
-        studentId: studentId.value,
+        studentId: studentId.value.trim(),
 
-        studentName: studentName.value,
+        studentName: studentName.value.trim(),
 
-        studentEmail: studentEmail.value,
+        studentEmail: studentEmail.value.trim(),
 
-        studentPhone: studentPhone.value,
+        studentPhone: studentPhone.value.trim(),
 
         department: department.value
 
@@ -118,21 +134,55 @@ form.addEventListener("submit", async (e) => {
 
     try {
 
-        await fetch(API_URL, {
+        if (editingId) {
 
-            method: "POST",
+            // Update Student
 
-            headers: {
+            await fetch(`${API_URL}/${editingId}`, {
 
-                "Content-Type": "application/json",
+                method: "PUT",
 
-                Authorization: `Bearer ${token}`
+                headers: {
 
-            },
+                    "Content-Type": "application/json",
 
-            body: JSON.stringify(student)
+                    Authorization: `Bearer ${token}`
 
-        });
+                },
+
+                body: JSON.stringify(student)
+
+            });
+
+            alert("Student Updated Successfully");
+
+            editingId = null;
+
+        }
+
+        else {
+
+            // Add Student
+
+            await fetch(API_URL, {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type": "application/json",
+
+                    Authorization: `Bearer ${token}`
+
+                },
+
+                body: JSON.stringify(student)
+
+            });
+
+            alert("Student Added Successfully");
+
+        }
 
         form.reset();
 
@@ -144,47 +194,15 @@ form.addEventListener("submit", async (e) => {
 
         console.error(error);
 
+        alert("Something went wrong.");
+
     }
 
 });
 
-// ------------------------
-// Delete Student
-// ------------------------
-
-async function deleteStudent(id) {
-
-    if (!confirm("Delete Student?")) return;
-
-    try {
-
-        await fetch(`${API_URL}/${id}`, {
-
-            method: "DELETE",
-
-            headers: {
-
-                Authorization: `Bearer ${token}`
-
-            }
-
-        });
-
-        loadStudents();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-    }
-
-}
-
-// ------------------------
+// =========================
 // Edit Student
-// ------------------------
+// =========================
 
 async function editStudent(id) {
 
@@ -212,7 +230,7 @@ async function editStudent(id) {
 
         department.value = student.department;
 
-        await deleteStudent(id);
+        editingId = id;
 
     }
 
@@ -220,13 +238,57 @@ async function editStudent(id) {
 
         console.error(error);
 
+        alert("Unable to load student.");
+
     }
 
 }
 
-// ------------------------
+// =========================
+// Delete Student
+// =========================
+
+async function deleteStudent(id) {
+
+    if (!confirm("Are you sure you want to delete this student?")) {
+
+        return;
+
+    }
+
+    try {
+
+        await fetch(`${API_URL}/${id}`, {
+
+            method: "DELETE",
+
+            headers: {
+
+                Authorization: `Bearer ${token}`
+
+            }
+
+        });
+
+        alert("Student Deleted Successfully");
+
+        loadStudents();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Unable to delete student.");
+
+    }
+
+}
+
+// =========================
 // Search Students
-// ------------------------
+// =========================
 
 search.addEventListener("keyup", async () => {
 
@@ -244,13 +306,15 @@ search.addEventListener("keyup", async () => {
 
         const students = await response.json();
 
-        const value = search.value.toLowerCase();
+        const keyword = search.value.toLowerCase();
 
         const filtered = students.filter(student =>
 
-            student.studentName.toLowerCase().includes(value) ||
+            student.studentName.toLowerCase().includes(keyword) ||
 
-            student.studentId.toLowerCase().includes(value)
+            student.studentId.toLowerCase().includes(keyword) ||
+
+            student.department.toLowerCase().includes(keyword)
 
         );
 

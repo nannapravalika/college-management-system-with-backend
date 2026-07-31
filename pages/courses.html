@@ -3,18 +3,18 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Courses | Vertex Institute</title>
+<title>Courses | Vertex Institute</title>
 
-    <link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/style.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 </head>
 
@@ -100,11 +100,13 @@ Logout
 
 </aside>
 
-<!-- Main -->
+<!-- Main Content -->
 
 <main class="main-content">
 
 <h1>Course Management</h1>
+
+<!-- Add Course -->
 
 <div class="form-container">
 
@@ -125,22 +127,22 @@ placeholder="Course Name"
 required>
 
 <input
-type="text"
-id="courseFaculty"
-placeholder="Faculty Name"
-required>
-
-<input
 type="number"
-id="courseCredits"
+id="credits"
 placeholder="Credits"
 required>
 
-<button
-class="btn-primary"
-type="submit">
+<select id="department" required>
 
-Add Course
+<option value="">Select Department</option>
+
+</select>
+
+<button
+type="submit"
+class="btn-primary">
+
+Save Course
 
 </button>
 
@@ -148,14 +150,18 @@ Add Course
 
 </div>
 
+<!-- Search -->
+
 <div class="search-box">
 
 <input
 type="text"
-id="searchCourse"
+id="courseSearch"
 placeholder="Search Course">
 
 </div>
+
+<!-- Course Table -->
 
 <div class="table-section">
 
@@ -165,13 +171,13 @@ placeholder="Search Course">
 
 <tr>
 
-<th>Code</th>
+<th>Course Code</th>
 
-<th>Course</th>
-
-<th>Faculty</th>
+<th>Course Name</th>
 
 <th>Credits</th>
+
+<th>Department</th>
 
 <th>Actions</th>
 
@@ -191,7 +197,9 @@ placeholder="Search Course">
 
 </div>
 
+<script src="../js/config.js"></script>
 <script src="../js/courses.js"></script>
+<script src="../js/logout.js"></script>
 
 </body>
 

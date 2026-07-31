@@ -1,7 +1,7 @@
 // const API = "http://localhost:5000/api/dashboard";
 
 // GitHub Codespaces
-const API = "https://fluffy-train-q5pq6pp54rv2xr5p.github.dev/api/dashboard";
+const API = `${BASE_URL}/dashboard`;
 const token = localStorage.getItem("token");
 
 if (!token) {
