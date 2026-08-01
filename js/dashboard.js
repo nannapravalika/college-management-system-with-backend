@@ -1,14 +1,14 @@
-// const API = "http://localhost:5000/api/dashboard";
-
-// GitHub Codespaces
 const API = `${BASE_URL}/dashboard`;
+
 const token = localStorage.getItem("token");
 
 if (!token) {
 
-    window.location.href = "../index.html";
+    window.location.href = "login.html";
 
 }
+
+loadDashboard();
 
 async function loadDashboard() {
 
@@ -26,48 +26,42 @@ async function loadDashboard() {
 
         const data = await response.json();
 
-        document.getElementById("totalStudents").innerText =
-            data.totalStudents;
+        document.getElementById("studentCount").innerText = data.totalStudents;
 
-        document.getElementById("totalCourses").innerText =
-            data.totalCourses;
+        document.getElementById("courseCount").innerText = data.totalCourses;
 
-        document.getElementById("totalDepartments").innerText =
-            data.totalDepartments;
+        document.getElementById("departmentCount").innerText = data.totalDepartments;
 
-        document.getElementById("totalFaculty").innerText =
-            data.totalFaculty;
+        const table = document.getElementById("recentStudents");
 
-        const tbody = document.getElementById("recentStudents");
-
-        tbody.innerHTML = "";
+        table.innerHTML = "";
 
         data.recentStudents.forEach(student => {
 
-            tbody.innerHTML += `
+            table.innerHTML += `
+
             <tr>
 
                 <td>${student.studentId}</td>
 
                 <td>${student.studentName}</td>
 
-                <td>${student.department}</td>
+                <td>${student.department.departmentName}</td>
 
-                <td>-</td>
+                <td>${student.course.courseName}</td>
 
             </tr>
+
             `;
 
         });
 
     }
 
-    catch (err) {
+    catch (error) {
 
-        console.log(err);
+        console.log(error);
 
     }
 
 }
-
-loadDashboard();

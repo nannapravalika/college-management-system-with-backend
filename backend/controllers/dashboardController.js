@@ -12,15 +12,17 @@ exports.getDashboard = async (req, res) => {
 
         const totalCourses = await Course.countDocuments();
 
-        // You don't have a Faculty model yet.
-        // Return 0 for now.
-        const totalFaculty = 0;
-
         const recentStudents = await Student.find()
+
+            .populate("department", "departmentName")
+
+            .populate("course", "courseName")
+
             .sort({ createdAt: -1 })
+
             .limit(5);
 
-        res.json({
+        res.status(200).json({
 
             totalStudents,
 
@@ -28,19 +30,17 @@ exports.getDashboard = async (req, res) => {
 
             totalCourses,
 
-            totalFaculty,
-
             recentStudents
 
         });
 
     }
 
-    catch (err) {
+    catch (error) {
 
         res.status(500).json({
 
-            message: err.message
+            message: error.message
 
         });
 

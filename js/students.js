@@ -1,29 +1,158 @@
+const STUDENT_API = `${BASE_URL}/students`;
+const DEPARTMENT_API = `${BASE_URL}/departments`;
+const COURSE_API = `${BASE_URL}/courses`;
+
+const token = localStorage.getItem("token");
+
+if (!token) {
+
+    window.location.href = "login.html";
+
+}
+
 const form = document.getElementById("studentForm");
 const table = document.querySelector("#studentTable tbody");
 const search = document.getElementById("searchStudent");
 
-const API_URL = `${BASE_URL}/students`;
-const token = localStorage.getItem("token");
-
-// Redirect if not logged in
-if (!token) {
-    window.location.href = "login.html";
-}
+const departmentSelect = document.getElementById("department");
+const courseSelect = document.getElementById("course");
 
 let editingId = null;
 
-// =========================
+// =======================================
+// Load Departments
+// =======================================
+
+async function loadDepartments() {
+
+    try {
+
+        const response = await fetch(DEPARTMENT_API, {
+
+            headers: {
+
+                Authorization: `Bearer ${token}`
+
+            }
+
+        });
+
+        const departments = await response.json();
+
+        departmentSelect.innerHTML = `
+
+            <option value="">Select Department</option>
+
+        `;
+
+        departments.forEach(department => {
+
+            departmentSelect.innerHTML += `
+
+                <option value="${department._id}">
+
+                    ${department.departmentName}
+
+                </option>
+
+            `;
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.log(error);
+
+    }
+
+}
+
+// =======================================
+// Load Courses Based On Department
+// =======================================
+
+departmentSelect.addEventListener("change", loadCourses);
+
+async function loadCourses() {
+
+    const departmentId = departmentSelect.value;
+
+    courseSelect.innerHTML = `
+
+        <option value="">
+
+            Select Course
+
+        </option>
+
+    `;
+
+    if (!departmentId) {
+
+        return;
+
+    }
+
+    try {
+
+        const response = await fetch(
+
+            `${COURSE_API}/department/${departmentId}`,
+
+            {
+
+                headers: {
+
+                    Authorization: `Bearer ${token}`
+
+                }
+
+            }
+
+        );
+
+        const courses = await response.json();
+
+        courses.forEach(course => {
+
+            courseSelect.innerHTML += `
+
+                <option value="${course._id}">
+
+                    ${course.courseName}
+
+                </option>
+
+            `;
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.log(error);
+
+    }
+
+}
+
+// =======================================
 // Load Students
-// =========================
+// =======================================
 
 async function loadStudents() {
 
     try {
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(STUDENT_API, {
 
             headers: {
+
                 Authorization: `Bearer ${token}`
+
             }
 
         });
@@ -36,19 +165,19 @@ async function loadStudents() {
 
     catch (error) {
 
-        console.error(error);
-
-        alert("Unable to load students.");
+        console.log(error);
 
     }
 
 }
 
+loadDepartments();
+
 loadStudents();
 
-// =========================
+// =======================================
 // Display Students
-// =========================
+// =======================================
 
 function displayStudents(students) {
 
@@ -57,9 +186,17 @@ function displayStudents(students) {
     if (students.length === 0) {
 
         table.innerHTML = `
+
         <tr>
-            <td colspan="6">No Students Found</td>
+
+            <td colspan="7">
+
+                No Students Found
+
+            </td>
+
         </tr>
+
         `;
 
         return;
@@ -80,12 +217,16 @@ function displayStudents(students) {
 
             <td>${student.studentPhone}</td>
 
-            <td>${student.department}</td>
+            <td>${student.department.departmentName}</td>
+
+            <td>${student.course.courseName}</td>
 
             <td>
 
                 <button
+
                     class="edit-btn"
+
                     onclick="editStudent('${student._id}')">
 
                     Edit
@@ -93,7 +234,9 @@ function displayStudents(students) {
                 </button>
 
                 <button
+
                     class="delete-btn"
+
                     onclick="deleteStudent('${student._id}')">
 
                     Delete
@@ -109,10 +252,9 @@ function displayStudents(students) {
     });
 
 }
-
-// =========================
+// =======================================
 // Add / Update Student
-// =========================
+// =======================================
 
 form.addEventListener("submit", async (e) => {
 
@@ -120,15 +262,17 @@ form.addEventListener("submit", async (e) => {
 
     const student = {
 
-        studentId: studentId.value.trim(),
+        studentId: studentId.value,
 
-        studentName: studentName.value.trim(),
+        studentName: studentName.value,
 
-        studentEmail: studentEmail.value.trim(),
+        studentEmail: studentEmail.value,
 
-        studentPhone: studentPhone.value.trim(),
+        studentPhone: studentPhone.value,
 
-        department: department.value
+        department: departmentSelect.value,
+
+        course: courseSelect.value
 
     };
 
@@ -136,9 +280,7 @@ form.addEventListener("submit", async (e) => {
 
         if (editingId) {
 
-            // Update Student
-
-            await fetch(`${API_URL}/${editingId}`, {
+            const response = await fetch(`${STUDENT_API}/${editingId}`, {
 
                 method: "PUT",
 
@@ -154,6 +296,16 @@ form.addEventListener("submit", async (e) => {
 
             });
 
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                alert(data.message);
+
+                return;
+
+            }
+
             alert("Student Updated Successfully");
 
             editingId = null;
@@ -162,9 +314,7 @@ form.addEventListener("submit", async (e) => {
 
         else {
 
-            // Add Student
-
-            await fetch(API_URL, {
+            const response = await fetch(STUDENT_API, {
 
                 method: "POST",
 
@@ -180,11 +330,31 @@ form.addEventListener("submit", async (e) => {
 
             });
 
+            const data = await response.json();
+
+            if (!response.ok) {
+
+                alert(data.message);
+
+                return;
+
+            }
+
             alert("Student Added Successfully");
 
         }
 
         form.reset();
+
+        courseSelect.innerHTML = `
+
+            <option value="">
+
+                Select Course
+
+            </option>
+
+        `;
 
         loadStudents();
 
@@ -192,23 +362,23 @@ form.addEventListener("submit", async (e) => {
 
     catch (error) {
 
-        console.error(error);
+        console.log(error);
 
-        alert("Something went wrong.");
+        alert("Unable to connect to server.");
 
     }
 
 });
 
-// =========================
+// =======================================
 // Edit Student
-// =========================
+// =======================================
 
 async function editStudent(id) {
 
     try {
 
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${STUDENT_API}/${id}`, {
 
             headers: {
 
@@ -220,6 +390,8 @@ async function editStudent(id) {
 
         const student = await response.json();
 
+        editingId = student._id;
+
         studentId.value = student.studentId;
 
         studentName.value = student.studentName;
@@ -228,29 +400,39 @@ async function editStudent(id) {
 
         studentPhone.value = student.studentPhone;
 
-        department.value = student.department;
+        departmentSelect.value = student.department._id;
 
-        editingId = id;
+        await loadCourses();
+
+        courseSelect.value = student.course._id;
+
+        window.scrollTo({
+
+            top: 0,
+
+            behavior: "smooth"
+
+        });
 
     }
 
     catch (error) {
 
-        console.error(error);
-
-        alert("Unable to load student.");
+        console.log(error);
 
     }
 
 }
 
-// =========================
+// =======================================
 // Delete Student
-// =========================
+// =======================================
 
 async function deleteStudent(id) {
 
-    if (!confirm("Are you sure you want to delete this student?")) {
+    const confirmDelete = confirm("Delete this student?");
+
+    if (!confirmDelete) {
 
         return;
 
@@ -258,7 +440,7 @@ async function deleteStudent(id) {
 
     try {
 
-        await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${STUDENT_API}/${id}`, {
 
             method: "DELETE",
 
@@ -270,6 +452,16 @@ async function deleteStudent(id) {
 
         });
 
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            alert(data.message);
+
+            return;
+
+        }
+
         alert("Student Deleted Successfully");
 
         loadStudents();
@@ -278,23 +470,20 @@ async function deleteStudent(id) {
 
     catch (error) {
 
-        console.error(error);
-
-        alert("Unable to delete student.");
+        console.log(error);
 
     }
 
 }
-
-// =========================
+// =======================================
 // Search Students
-// =========================
+// =======================================
 
 search.addEventListener("keyup", async () => {
 
     try {
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(STUDENT_API, {
 
             headers: {
 
@@ -306,15 +495,27 @@ search.addEventListener("keyup", async () => {
 
         const students = await response.json();
 
-        const keyword = search.value.toLowerCase();
+        const keyword = search.value.toLowerCase().trim();
 
         const filtered = students.filter(student =>
 
-            student.studentName.toLowerCase().includes(keyword) ||
+            student.studentName.toLowerCase().includes(keyword)
 
-            student.studentId.toLowerCase().includes(keyword) ||
+            ||
 
-            student.department.toLowerCase().includes(keyword)
+            student.studentId.toLowerCase().includes(keyword)
+
+            ||
+
+            student.studentEmail.toLowerCase().includes(keyword)
+
+            ||
+
+            student.department.departmentName.toLowerCase().includes(keyword)
+
+            ||
+
+            student.course.courseName.toLowerCase().includes(keyword)
 
         );
 
@@ -324,8 +525,60 @@ search.addEventListener("keyup", async () => {
 
     catch (error) {
 
-        console.error(error);
+        console.log(error);
 
     }
 
 });
+
+// =======================================
+// Refresh Form
+// =======================================
+
+function resetForm() {
+
+    form.reset();
+
+    editingId = null;
+
+    courseSelect.innerHTML = `
+
+        <option value="">
+
+            Select Course
+
+        </option>
+
+    `;
+
+}
+
+// =======================================
+// Cancel Edit (ESC Key)
+// =======================================
+
+document.addEventListener("keydown", (event) => {
+
+    if (event.key === "Escape") {
+
+        resetForm();
+
+    }
+
+});
+
+// =======================================
+// Auto Refresh Every 30 Seconds
+// =======================================
+
+setInterval(() => {
+
+    loadStudents();
+
+}, 30000);
+
+// =======================================
+// Console
+// =======================================
+
+console.log("Student Management Loaded Successfully");

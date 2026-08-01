@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Students | Vertex Institute</title>
@@ -63,7 +64,7 @@ Students
 
 <a href="courses.html">
 
-<i class="fa-solid fa-book"></i>
+<i class="fa-solid fa-book-open"></i>
 
 Courses
 
@@ -105,8 +106,6 @@ Logout
 
 <h1>Student Management</h1>
 
-<!-- Student Form -->
-
 <div class="form-container">
 
 <h2>Add Student</h2>
@@ -137,19 +136,27 @@ id="studentPhone"
 placeholder="Phone Number"
 required>
 
-<select id="department">
+<select
+id="department"
+required>
 
-<option value="">Select Department</option>
+<option value="">
 
-<option>CSE</option>
+Select Department
 
-<option>ECE</option>
+</option>
 
-<option>Mechanical</option>
+</select>
 
-<option>Civil</option>
+<select
+id="course"
+required>
 
-<option>MBA</option>
+<option value="">
+
+Select Course
+
+</option>
 
 </select>
 
@@ -157,15 +164,13 @@ required>
 class="btn-primary"
 type="submit">
 
-Add Student
+Save Student
 
 </button>
 
 </form>
 
 </div>
-
-<!-- Search -->
 
 <div class="search-box">
 
@@ -175,8 +180,6 @@ id="searchStudent"
 placeholder="Search Student">
 
 </div>
-
-<!-- Student Table -->
 
 <div class="table-section">
 
@@ -195,6 +198,8 @@ placeholder="Search Student">
 <th>Phone</th>
 
 <th>Department</th>
+
+<th>Course</th>
 
 <th>Actions</th>
 
@@ -217,6 +222,7 @@ placeholder="Search Student">
 <script src="../js/config.js"></script>
 <script src="../js/students.js"></script>
 <script src="../js/logout.js"></script>
+
 </body>
 
 </html>
