@@ -128,9 +128,11 @@ form.addEventListener("submit", async (e) => {
 
     try {
 
+        let response;
+
         if (editingId) {
 
-            await fetch(`${API_URL}/${editingId}`, {
+            response = await fetch(`${API_URL}/${editingId}`, {
 
                 method: "PUT",
 
@@ -146,15 +148,11 @@ form.addEventListener("submit", async (e) => {
 
             });
 
-            alert("Department Updated Successfully");
-
-            editingId = null;
-
         }
 
         else {
 
-            await fetch(API_URL, {
+            response = await fetch(API_URL, {
 
                 method: "POST",
 
@@ -170,9 +168,21 @@ form.addEventListener("submit", async (e) => {
 
             });
 
-            alert("Department Added Successfully");
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            alert(data.message);
+
+            return;
 
         }
+
+        alert(editingId ? "Department Updated Successfully" : "Department Added Successfully");
+
+        editingId = null;
 
         form.reset();
 
@@ -184,7 +194,7 @@ form.addEventListener("submit", async (e) => {
 
         console.error(error);
 
-        alert("Something went wrong");
+        alert("Unable to connect to server");
 
     }
 
