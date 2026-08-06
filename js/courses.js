@@ -4,9 +4,7 @@ const DEPARTMENT_API = `${BASE_URL}/departments`;
 const token = localStorage.getItem("token");
 
 if (!token) {
-
     window.location.href = "login.html";
-
 }
 
 const form = document.getElementById("courseForm");
@@ -16,9 +14,31 @@ const departmentSelect = document.getElementById("department");
 
 let editingId = null;
 
-// ==========================
+// =======================================
+// Handle Unauthorized
+// =======================================
+
+function handleUnauthorized(response) {
+
+    if (response.status === 401) {
+
+        localStorage.clear();
+
+        alert("Session expired. Please login again.");
+
+        window.location.href = "login.html";
+
+        return true;
+
+    }
+
+    return false;
+
+}
+
+// =======================================
 // Load Departments
-// ==========================
+// =======================================
 
 async function loadDepartments() {
 
@@ -34,22 +54,21 @@ async function loadDepartments() {
 
         });
 
-        const departments = await response.json();
+        if (handleUnauthorized(response)) return;
 
-        departmentSelect.innerHTML = `
+        const data = await response.json();
 
-            <option value="">Select Department</option>
+        const departments = data.departments || data;
 
-        `;
+        departmentSelect.innerHTML =
+            `<option value="">Select Department</option>`;
 
         departments.forEach(department => {
 
             departmentSelect.innerHTML += `
 
                 <option value="${department._id}">
-
                     ${department.departmentName}
-
                 </option>
 
             `;
@@ -60,15 +79,17 @@ async function loadDepartments() {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load departments.");
 
     }
 
 }
 
-// ==========================
+// =======================================
 // Load Courses
-// ==========================
+// =======================================
 
 async function loadCourses() {
 
@@ -84,7 +105,11 @@ async function loadCourses() {
 
         });
 
-        const courses = await response.json();
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        const courses = data.courses || data;
 
         displayCourses(courses);
 
@@ -92,175 +117,19 @@ async function loadCourses() {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load courses.");
 
     }
 
 }
 
 loadDepartments();
-
 loadCourses();
-
-// ==========================
-// Display Courses
-// ==========================
-
-function displayCourses(courses) {
-
-    table.innerHTML = "";
-
-    if (courses.length === 0) {
-
-        table.innerHTML = `
-
-        <tr>
-
-            <td colspan="5">
-
-                No Courses Found
-
-            </td>
-
-        </tr>
-
-        `;
-
-        return;
-
-    }
-
-    courses.forEach(course => {
-
-        table.innerHTML += `
-
-        <tr>
-
-            <td>${course.courseCode}</td>
-
-            <td>${course.courseName}</td>
-
-            <td>${course.credits}</td>
-
-            <td>${course.department.departmentName}</td>
-
-            <td>
-
-                <button
-
-                    class="edit-btn"
-
-                    onclick="editCourse('${course._id}')">
-
-                    Edit
-
-                </button>
-
-                <button
-
-                    class="delete-btn"
-
-                    onclick="deleteCourse('${course._id}')">
-
-                    Delete
-
-                </button>
-
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
-}
-
-// ==========================
-// Save Course
-// ==========================
-
-form.addEventListener("submit", async (e) => {
-
-    e.preventDefault();
-
-    const course = {
-
-        courseCode: courseCode.value,
-
-        courseName: courseName.value,
-
-        credits: credits.value,
-
-        department: department.value
-
-    };
-
-    try {
-
-        if (editingId) {
-
-            await fetch(`${COURSE_API}/${editingId}`, {
-
-                method: "PUT",
-
-                headers: {
-
-                    "Content-Type": "application/json",
-
-                    Authorization: `Bearer ${token}`
-
-                },
-
-                body: JSON.stringify(course)
-
-            });
-
-            alert("Course Updated");
-
-            editingId = null;
-
-        }
-
-        else {
-
-            await fetch(COURSE_API, {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type": "application/json",
-
-                    Authorization: `Bearer ${token}`
-
-                },
-
-                body: JSON.stringify(course)
-
-            });
-
-            alert("Course Added");
-
-        }
-
-        form.reset();
-
-        loadCourses();
-
-    }
-
-    catch (error) {
-
-        console.log(error);
-
-    }
-
-});
-
-// ==========================
+// =======================================
 // Edit Course
-// ==========================
+// =======================================
 
 async function editCourse(id) {
 
@@ -276,43 +145,54 @@ async function editCourse(id) {
 
         });
 
-        const course = await response.json();
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        const course = data.course || data;
+
+        editingId = course._id;
 
         courseCode.value = course.courseCode;
-
         courseName.value = course.courseName;
-
         credits.value = course.credits;
+        departmentSelect.value = course.department?._id || "";
 
-        department.value = course.department._id;
+        window.scrollTo({
 
-        editingId = id;
+            top: 0,
+
+            behavior: "smooth"
+
+        });
 
     }
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load course.");
 
     }
 
 }
 
-// ==========================
+// =======================================
 // Delete Course
-// ==========================
+// =======================================
 
 async function deleteCourse(id) {
 
-    if (!confirm("Delete Course?")) {
+    const confirmDelete = confirm(
+        "Are you sure you want to delete this course?"
+    );
 
-        return;
-
-    }
+    if (!confirmDelete) return;
 
     try {
 
-        await fetch(`${COURSE_API}/${id}`, {
+        const response = await fetch(`${COURSE_API}/${id}`, {
 
             method: "DELETE",
 
@@ -324,7 +204,19 @@ async function deleteCourse(id) {
 
         });
 
-        alert("Course Deleted");
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            alert(data.message);
+
+            return;
+
+        }
+
+        alert(data.message);
 
         loadCourses();
 
@@ -332,46 +224,118 @@ async function deleteCourse(id) {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to delete course.");
 
     }
 
 }
 
-// ==========================
-// Search
-// ==========================
+// =======================================
+// Search Courses
+// =======================================
 
 search.addEventListener("keyup", async () => {
 
-    const response = await fetch(COURSE_API, {
+    const keyword = search.value.trim();
 
-        headers: {
+    try {
 
-            Authorization: `Bearer ${token}`
+        const response = await fetch(
 
-        }
+            `${COURSE_API}?search=${encodeURIComponent(keyword)}`,
 
-    });
+            {
 
-    const courses = await response.json();
+                headers: {
 
-    const keyword = search.value.toLowerCase();
+                    Authorization: `Bearer ${token}`
 
-    const filtered = courses.filter(course =>
+                }
 
-        course.courseName.toLowerCase().includes(keyword)
+            }
 
-        ||
+        );
 
-        course.courseCode.toLowerCase().includes(keyword)
+        if (handleUnauthorized(response)) return;
 
-        ||
+        const data = await response.json();
 
-        course.department.departmentName.toLowerCase().includes(keyword)
+        const courses = data.courses || data;
 
-    );
+        displayCourses(courses);
 
-    displayCourses(filtered);
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert("Search failed.");
+
+    }
 
 });
+
+// =======================================
+// Reset Form
+// =======================================
+
+function resetForm() {
+
+    form.reset();
+
+    editingId = null;
+
+    departmentSelect.value = "";
+
+    courseCode.focus();
+
+}
+
+// =======================================
+// ESC Key Cancels Edit
+// =======================================
+
+document.addEventListener("keydown", (event) => {
+
+    if (event.key === "Escape") {
+
+        resetForm();
+
+    }
+
+});
+
+// =======================================
+// Auto Refresh Every 30 Seconds
+// =======================================
+
+setInterval(() => {
+
+    if (document.visibilityState === "visible") {
+
+        loadCourses();
+
+    }
+
+}, 30000);
+
+// =======================================
+// Prevent Form Resubmission
+// =======================================
+
+window.history.replaceState(null, null, window.location.href);
+
+// =======================================
+// Console
+// =======================================
+
+console.log("=================================");
+console.log("Course Management Loaded");
+console.log("Authentication : Enabled");
+console.log("CRUD Operations : Enabled");
+console.log("Search : Enabled");
+console.log("Auto Refresh : Enabled");
+console.log("=================================");

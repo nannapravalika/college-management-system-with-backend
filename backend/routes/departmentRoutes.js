@@ -2,7 +2,11 @@ const express = require("express");
 
 const router = express.Router();
 
-const auth = require("../middleware/authMiddleware");
+const {
+    protect,
+    adminOnly,
+    facultyOrAdmin
+} = require("../middleware/authMiddleware");
 
 const {
 
@@ -14,23 +18,48 @@ const {
 
 } = require("../controllers/departmentController");
 
-// ==============================
-// Department Routes
-// ==============================
+// =======================================
+// View Departments
+// (Faculty + Admin)
+// =======================================
 
-// Get All Departments
-router.get("/", auth, getDepartments);
+router.get(
+    "/",
+    protect,
+    facultyOrAdmin,
+    getDepartments
+);
 
-// Get Single Department
-router.get("/:id", auth, getDepartment);
+router.get(
+    "/:id",
+    protect,
+    facultyOrAdmin,
+    getDepartment
+);
 
-// Create Department
-router.post("/", auth, createDepartment);
+// =======================================
+// Admin Only
+// =======================================
 
-// Update Department
-router.put("/:id", auth, updateDepartment);
+router.post(
+    "/",
+    protect,
+    adminOnly,
+    createDepartment
+);
 
-// Delete Department
-router.delete("/:id", auth, deleteDepartment);
+router.put(
+    "/:id",
+    protect,
+    adminOnly,
+    updateDepartment
+);
+
+router.delete(
+    "/:id",
+    protect,
+    adminOnly,
+    deleteDepartment
+);
 
 module.exports = router;

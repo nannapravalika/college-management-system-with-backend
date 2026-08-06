@@ -2,6 +2,10 @@ const Student = require("../models/Student");
 const Department = require("../models/Department");
 const Course = require("../models/Course");
 
+// =======================================
+// Dashboard Statistics
+// =======================================
+
 exports.getDashboard = async (req, res) => {
 
     try {
@@ -18,11 +22,17 @@ exports.getDashboard = async (req, res) => {
 
             .populate("course", "courseName")
 
-            .sort({ createdAt: -1 })
+            .sort({
+
+                createdAt: -1
+
+            })
 
             .limit(5);
 
         res.status(200).json({
+
+            success: true,
 
             totalStudents,
 
@@ -38,7 +48,11 @@ exports.getDashboard = async (req, res) => {
 
     catch (error) {
 
+        console.error(error);
+
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 

@@ -1,45 +1,97 @@
 const Course = require("../models/Course");
 
-// ==============================
+// =======================================
 // Get All Courses
-// ==============================
+// Supports Search
+// =======================================
 
 exports.getCourses = async (req, res) => {
 
     try {
 
-        const courses = await Course.find()
-            .populate("department", "departmentName departmentCode")
-            .sort({ createdAt: -1 });
+        const search = req.query.search || "";
 
-        res.status(200).json(courses);
+        let filter = {};
+
+        if (search) {
+
+            filter = {
+
+                $or: [
+
+                    {
+                        courseCode: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+
+                    {
+                        courseName: {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    }
+
+                ]
+
+            };
+
+        }
+
+        const courses = await Course.find(filter)
+
+            .populate("department", "departmentName departmentCode")
+
+            .sort({
+
+                createdAt: -1
+
+            });
+
+        res.status(200).json({
+
+            success: true,
+
+            courses
+
+        });
 
     }
 
     catch (error) {
 
+        console.error(error);
+
         res.status(500).json({
+
+            success: false,
+
             message: error.message
+
         });
 
     }
 
 };
 
-// ==============================
+// =======================================
 // Get Single Course
-// ==============================
+// =======================================
 
 exports.getCourse = async (req, res) => {
 
     try {
 
         const course = await Course.findById(req.params.id)
+
             .populate("department", "departmentName departmentCode");
 
         if (!course) {
 
             return res.status(404).json({
+
+                success: false,
 
                 message: "Course not found"
 
@@ -47,13 +99,21 @@ exports.getCourse = async (req, res) => {
 
         }
 
-        res.status(200).json(course);
+        res.status(200).json({
+
+            success: true,
+
+            course
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -63,9 +123,9 @@ exports.getCourse = async (req, res) => {
 
 };
 
-// ==============================
+// =======================================
 // Create Course
-// ==============================
+// =======================================
 
 exports.createCourse = async (req, res) => {
 
@@ -93,7 +153,9 @@ exports.createCourse = async (req, res) => {
 
             return res.status(400).json({
 
-                message: "Course Code already exists"
+                success: false,
+
+                message: "Course code already exists"
 
             });
 
@@ -111,13 +173,23 @@ exports.createCourse = async (req, res) => {
 
         });
 
-        res.status(201).json(course);
+        res.status(201).json({
+
+            success: true,
+
+            message: "Course added successfully.",
+
+            course
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -127,33 +199,21 @@ exports.createCourse = async (req, res) => {
 
 };
 
-// ==============================
+// =======================================
 // Update Course
-// ==============================
+// =======================================
 
 exports.updateCourse = async (req, res) => {
 
     try {
 
-        const course = await Course.findByIdAndUpdate(
-
-            req.params.id,
-
-            req.body,
-
-            {
-
-                new: true,
-
-                runValidators: true
-
-            }
-
-        );
+        const course = await Course.findById(req.params.id);
 
         if (!course) {
 
             return res.status(404).json({
+
+                success: false,
 
                 message: "Course not found"
 
@@ -161,13 +221,51 @@ exports.updateCourse = async (req, res) => {
 
         }
 
-        res.status(200).json(course);
+        const duplicate = await Course.findOne({
+
+            _id: {
+
+                $ne: req.params.id
+
+            },
+
+            courseCode: req.body.courseCode
+
+        });
+
+        if (duplicate) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Course code already exists"
+
+            });
+
+        }
+
+        Object.assign(course, req.body);
+
+        await course.save();
+
+        res.status(200).json({
+
+            success: true,
+
+            message: "Course updated successfully.",
+
+            course
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -177,19 +275,21 @@ exports.updateCourse = async (req, res) => {
 
 };
 
-// ==============================
+// =======================================
 // Delete Course
-// ==============================
+// =======================================
 
 exports.deleteCourse = async (req, res) => {
 
     try {
 
-        const course = await Course.findByIdAndDelete(req.params.id);
+        const course = await Course.findById(req.params.id);
 
         if (!course) {
 
             return res.status(404).json({
+
+                success: false,
 
                 message: "Course not found"
 
@@ -197,9 +297,13 @@ exports.deleteCourse = async (req, res) => {
 
         }
 
+        await course.deleteOne();
+
         res.status(200).json({
 
-            message: "Course deleted successfully"
+            success: true,
+
+            message: "Course deleted successfully."
 
         });
 
@@ -209,6 +313,8 @@ exports.deleteCourse = async (req, res) => {
 
         res.status(500).json({
 
+            success: false,
+
             message: error.message
 
         });
@@ -217,9 +323,9 @@ exports.deleteCourse = async (req, res) => {
 
 };
 
-// ==============================
+// =======================================
 // Get Courses By Department
-// ==============================
+// =======================================
 
 exports.getCoursesByDepartment = async (req, res) => {
 
@@ -229,15 +335,29 @@ exports.getCoursesByDepartment = async (req, res) => {
 
             department: req.params.departmentId
 
+        })
+
+        .sort({
+
+            courseName: 1
+
         });
 
-        res.status(200).json(courses);
+        res.status(200).json({
+
+            success: true,
+
+            courses
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 

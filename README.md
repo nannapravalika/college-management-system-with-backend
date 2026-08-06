@@ -1,286 +1,343 @@
 # 🎓 College Management System
-### Vertex Institute of Technology
+
+A full-stack **College Management System** developed using **Node.js, Express.js, MongoDB, and JavaScript**. The application provides a secure platform for managing students, departments, and courses with authentication, authorization, and a responsive user interface.
 
 ---
 
-## 📖 Project Description
+# 📌 Project Overview
 
-The **College Management System** is a responsive web-based application developed to simplify the management of academic information within a college environment. The system provides a user-friendly interface for administrators to manage students, courses, and departments while offering visitors a public website to explore the institution.
+The College Management System is designed to simplify the administration of academic information. It allows administrators to securely manage student records, departments, and courses through a centralized dashboard.
 
-This project was developed as part of the **Master's Web Development Deliverable 1** assessment.
-
----
-
-# 🎯 Objectives
-
-The objectives of this project are:
-
-- Develop a responsive college website.
-- Design an attractive and user-friendly interface.
-- Implement basic CRUD operations using JavaScript.
-- Store application data using Browser Local Storage.
-- Demonstrate front-end web development skills.
+The project follows the **MVC (Model-View-Controller)** architecture and implements RESTful APIs for efficient communication between the frontend and backend.
 
 ---
 
 # 🚀 Features
 
-## Public Website
+### Authentication & Security
 
-- Home Page
-- About Section
-- Courses Page
-- Departments Page
-- Responsive Navigation
-- Modern UI Design
-
-## Administrator Module
-
-- Secure Login
-- Dashboard
-- Student Management
-- Course Management
-- Department Management
+* JWT Authentication
+* Secure Login System
+* Password Hashing using bcryptjs
+* Protected Routes
+* Role-based User Model
+* Helmet Security Middleware
+* CORS Enabled
 
 ---
 
-# 📂 Project Structure
+### Student Management
+
+* Add Student
+* View Students
+* Update Student
+* Delete Student
+* Search Students
+* Assign Department
+* Assign Course
+
+---
+
+### Department Management
+
+* Add Department
+* View Departments
+* Edit Department
+* Delete Department
+* Search Departments
+
+---
+
+### Course Management
+
+* Add Course
+* View Courses
+* Update Course
+* Delete Course
+* Search Courses
+* Assign Courses to Departments
+
+---
+
+### Dashboard
+
+* Total Students
+* Total Departments
+* Total Courses
+* Recently Added Students
+
+---
+
+# 🛠️ Technologies Used
+
+## Frontend
+
+* HTML5
+* CSS3
+* JavaScript (ES6)
+
+## Backend
+
+* Node.js
+* Express.js
+
+## Database
+
+* MongoDB Atlas
+* Mongoose ODM
+
+## Authentication
+
+* JSON Web Token (JWT)
+* bcryptjs
+
+## Middleware
+
+* Express JSON
+* CORS
+* Helmet
+* Morgan
+
+## Development Tools
+
+* Nodemon
+* Git
+* GitHub
+* Visual Studio Code / GitHub Codespaces
+
+---
+
+# 📁 Project Structure
 
 ```
-College-Management-System/
-
+college-management-system/
 │
-├── index.html
+├── backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── server.js
+│   ├── seedAdmin.js
+│   └── .env
 │
 ├── css/
-│   └── style.css
-│
 ├── js/
-│   ├── main.js
-│   ├── login.js
-│   ├── students.js
-│   ├── courses.js
-│   └── departments.js
+├── images/
 │
-├── pages/
-│   ├── public-courses.html
-│   ├── public-departments.html
-│   ├── login.html
-│   ├── dashboard.html
-│   ├── students.html
-│   ├── courses.html
-│   └── departments.html
+├── index.html
+├── login.html
+├── dashboard.html
+├── students.html
+├── departments.html
+├── courses.html
 │
-├── assets/
-│   ├── images/
-│   └── icons/
-│
+├── package.json
 └── README.md
 ```
 
 ---
 
-# 💻 Technologies Used
+# 🗄️ Database Collections
 
-- HTML5
-- CSS3
-- JavaScript (ES6)
-- Browser Local Storage
-- Google Fonts
-- Font Awesome
+* Users
+* Students
+* Departments
+* Courses
 
 ---
 
-# 🔐 Login Credentials
+# 🔗 API Endpoints
 
-### Username
+## Authentication
+
+| Method | Endpoint             |
+| ------ | -------------------- |
+| POST   | `/api/auth/register` |
+| POST   | `/api/auth/login`    |
+
+---
+
+## Students
+
+| Method | Endpoint            |
+| ------ | ------------------- |
+| GET    | `/api/students`     |
+| GET    | `/api/students/:id` |
+| POST   | `/api/students`     |
+| PUT    | `/api/students/:id` |
+| DELETE | `/api/students/:id` |
+
+---
+
+## Departments
+
+| Method | Endpoint               |
+| ------ | ---------------------- |
+| GET    | `/api/departments`     |
+| GET    | `/api/departments/:id` |
+| POST   | `/api/departments`     |
+| PUT    | `/api/departments/:id` |
+| DELETE | `/api/departments/:id` |
+
+---
+
+## Courses
+
+| Method | Endpoint                                |
+| ------ | --------------------------------------- |
+| GET    | `/api/courses`                          |
+| GET    | `/api/courses/:id`                      |
+| GET    | `/api/courses/department/:departmentId` |
+| POST   | `/api/courses`                          |
+| PUT    | `/api/courses/:id`                      |
+| DELETE | `/api/courses/:id`                      |
+
+---
+
+## Dashboard
+
+| Method | Endpoint         |
+| ------ | ---------------- |
+| GET    | `/api/dashboard` |
+
+---
+
+# 🔒 Security Features
+
+* JWT Authentication
+* Password Encryption using bcryptjs
+* Protected API Routes
+* Input Validation
+* Error Handling
+* Helmet Security Headers
+* CORS Configuration
+
+---
+
+# 📊 Database Relationships
 
 ```
-admin
+Department
+      │
+      ├───────────────┐
+      │               │
+      ▼               ▼
+ Course           Student
+      ▲               ▲
+      └───────────────┘
 ```
 
-### Password
+Each student belongs to:
+
+* One Department
+* One Course
+
+Each course belongs to:
+
+* One Department
+
+---
+
+# ⚙️ Installation
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/nannapravalika/college-management-system-with-backend.git
+```
+
+---
+
+## Navigate to Backend
+
+```bash
+cd backend
+```
+
+---
+
+## Install Dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Create Environment File
+
+Create a `.env` file inside the `backend` folder.
+
+```env
+PORT=5000
+
+MONGO_URI=your_mongodb_connection_string
+
+JWT_SECRET=your_secret_key
+```
+
+---
+
+## Start Development Server
+
+```bash
+npm run dev
+```
+
+---
+
+The server will run at:
 
 ```
-admin123
+http://localhost:5000
 ```
 
 ---
 
-# 📋 Modules
+# 👤 Default Admin Login
 
-## 1. Home
+The application automatically creates an administrator account using the `seedAdmin.js` script.
 
-- Hero Section
-- About College
-- Features
-- Statistics
-- Testimonials
-- Footer
+Use the credentials configured in your seed script to log in after the first server start.
 
 ---
 
-## 2. Courses
+# 📷 Screenshots
 
-Displays all academic programs offered by the institute including:
+Add screenshots here before submitting:
 
-- Computer Science Engineering
-- Electronics & Communication Engineering
-- Mechanical Engineering
-- Civil Engineering
-- MBA
-- Science & Humanities
-
----
-
-## 3. Departments
-
-Provides department information including:
-
-- Department Name
-- Head of Department
-- Facilities
-- Overview
+* Home Page
+* Login Page
+* Dashboard
+* Student Management
+* Department Management
+* Course Management
 
 ---
 
-## 4. Dashboard
+# 📈 Future Enhancements
 
-Displays:
-
-- Total Students
-- Total Courses
-- Total Departments
-- Faculty Count
-- Recent Students
-- Quick Actions
-
----
-
-## 5. Student Management
-
-Functions:
-
-- Add Student
-- Edit Student
-- Delete Student
-- Search Student
+* Faculty Management
+* Library Management
+* Attendance Management
+* Student Profile Images
+* Report Generation (PDF)
+* Email Notifications
+* Role-Based Access Control for Faculty
+* Data Export to Excel
 
 ---
 
-## 6. Course Management
+# 👨‍💻 Author
 
-Functions:
+**Pravalika Nanna**
 
-- Add Course
-- Edit Course
-- Delete Course
-- Search Course
-
----
-
-# 💾 Data Storage
-
-The project uses **Browser Local Storage** to save:
-
-- Student Details
-- Course Details
-
-No external database is required.
-
----
-
-# 📱 Responsive Design
-
-The application is optimized for:
-
-- Desktop
-- Laptop
-- Tablet
-- Mobile Devices
-
----
-
-# ▶️ How to Run
-
-### Step 1
-
-Download or clone the project.
-
-### Step 2
-
-Open the project folder in **Visual Studio Code**.
-
-### Step 3
-
-Install the **Live Server** extension.
-
-### Step 4
-
-Open **index.html** using Live Server.
-
-
----
-
-# 🔮 Future Enhancements
-
-- Database Integration (MySQL)
-- PHP Backend
-- Student Login
-- Faculty Login
-- Attendance Management
-- Examination Module
-- Result Management
-- Fee Management
-- Notification System
-- Report Generation
-
----
-
-# 📚 References
-
-The following resources were consulted during the development of this project:
-
-1. Mozilla Developer Network (MDN)
-   https://developer.mozilla.org/
-
-2. W3Schools
-   https://www.w3schools.com/
-
-3. Font Awesome
-   https://fontawesome.com/
-
-4. Google Fonts
-   https://fonts.google.com/
-
-5. Visual Studio Code Documentation
-   https://code.visualstudio.com/docs
-
-6. JavaScript Documentation
-   https://developer.mozilla.org/en-US/docs/Web/JavaScript
-
----
-
-# 🙏 Acknowledgement
-
-This project was developed as part of the Master's Web Development assessment. Standard web development documentation, official references, and educational resources were consulted during the design and implementation of the application.
-
----
-
-# 👩‍💻 Developed By
-
-**Name:** 
-
-**Course:** Master's Program
-
-**Project Title:** College Management System
-
-**Academic Year:** 2026
+Bachelor of Technology (Computer Science & Engineering)
 
 ---
 
 # 📄 License
 
-This project has been developed for academic and educational purposes only.
-
-© 2026 Vertex Institute of Technology. All Rights Reserved.
+This project is developed for academic and educational purposes.

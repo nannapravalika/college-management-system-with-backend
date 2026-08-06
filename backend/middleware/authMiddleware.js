@@ -1,16 +1,25 @@
 const jwt = require("jsonwebtoken");
 
-module.exports = (req, res, next) => {
+// ===========================
+// Verify JWT Token
+// ===========================
+const protect = (req, res, next) => {
 
-    const authHeader = req.headers.authorization;
+    let token;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({
-            message: "Access Denied"
-        });
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith("Bearer")
+    ) {
+        token = req.headers.authorization.split(" ")[1];
     }
 
-    const token = authHeader.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({
+            success: false,
+            message: "Access denied. No token provided."
+        });
+    }
 
     try {
 
@@ -20,12 +29,58 @@ module.exports = (req, res, next) => {
 
         next();
 
-    } catch (err) {
+    } catch (error) {
 
-        res.status(401).json({
-            message: "Invalid Token"
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token."
         });
 
     }
 
+};
+
+// ===========================
+// Admin Only
+// ===========================
+const adminOnly = (req, res, next) => {
+
+    if (req.user.role !== "admin") {
+
+        return res.status(403).json({
+            success: false,
+            message: "Admin access required."
+        });
+
+    }
+
+    next();
+
+};
+
+// ===========================
+// Faculty or Admin
+// ===========================
+const facultyOrAdmin = (req, res, next) => {
+
+    if (
+        req.user.role !== "admin" &&
+        req.user.role !== "faculty"
+    ) {
+
+        return res.status(403).json({
+            success: false,
+            message: "Faculty or Admin access required."
+        });
+
+    }
+
+    next();
+
+};
+
+module.exports = {
+    protect,
+    adminOnly,
+    facultyOrAdmin
 };

@@ -1,32 +1,61 @@
 const Student = require("../models/Student");
 
-// ====================================
+// =======================================
 // Get All Students
-// ====================================
+// Supports Search
+// =======================================
 
 exports.getStudents = async (req, res) => {
 
     try {
 
-        const students = await Student.find()
+        const search = req.query.search || "";
+
+        let filter = {};
+
+        if (search) {
+
+            filter = {
+
+                $or: [
+
+                    { studentId: { $regex: search, $options: "i" } },
+
+                    { studentName: { $regex: search, $options: "i" } },
+
+                    { studentEmail: { $regex: search, $options: "i" } }
+
+                ]
+
+            };
+
+        }
+
+        const students = await Student.find(filter)
 
             .populate("department", "departmentName departmentCode")
 
             .populate("course", "courseName courseCode")
 
-            .sort({
+            .sort({ createdAt: -1 });
 
-                createdAt: -1
+        res.status(200).json({
 
-            });
+            success: true,
 
-        res.status(200).json(students);
+            students
+
+        });
 
     }
 
     catch (error) {
 
+        console.error(error);
+
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -36,9 +65,9 @@ exports.getStudents = async (req, res) => {
 
 };
 
-// ====================================
+// =======================================
 // Get Single Student
-// ====================================
+// =======================================
 
 exports.getStudent = async (req, res) => {
 
@@ -54,19 +83,29 @@ exports.getStudent = async (req, res) => {
 
             return res.status(404).json({
 
+                success: false,
+
                 message: "Student not found"
 
             });
 
         }
 
-        res.status(200).json(student);
+        res.status(200).json({
+
+            success: true,
+
+            student
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -76,9 +115,9 @@ exports.getStudent = async (req, res) => {
 
 };
 
-// ====================================
+// =======================================
 // Create Student
-// ====================================
+// =======================================
 
 exports.createStudent = async (req, res) => {
 
@@ -104,17 +143,9 @@ exports.createStudent = async (req, res) => {
 
             $or: [
 
-                {
+                { studentId },
 
-                    studentId
-
-                },
-
-                {
-
-                    studentEmail
-
-                }
+                { studentEmail }
 
             ]
 
@@ -123,6 +154,8 @@ exports.createStudent = async (req, res) => {
         if (exists) {
 
             return res.status(400).json({
+
+                success: false,
 
                 message: "Student ID or Email already exists"
 
@@ -146,13 +179,23 @@ exports.createStudent = async (req, res) => {
 
         });
 
-        res.status(201).json(student);
+        res.status(201).json({
+
+            success: true,
+
+            message: "Student added successfully.",
+
+            student
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -162,33 +205,21 @@ exports.createStudent = async (req, res) => {
 
 };
 
-// ====================================
+// =======================================
 // Update Student
-// ====================================
+// =======================================
 
 exports.updateStudent = async (req, res) => {
 
     try {
 
-        const student = await Student.findByIdAndUpdate(
-
-            req.params.id,
-
-            req.body,
-
-            {
-
-                new: true,
-
-                runValidators: true
-
-            }
-
-        );
+        const student = await Student.findById(req.params.id);
 
         if (!student) {
 
             return res.status(404).json({
+
+                success: false,
 
                 message: "Student not found"
 
@@ -196,13 +227,53 @@ exports.updateStudent = async (req, res) => {
 
         }
 
-        res.status(200).json(student);
+        const duplicate = await Student.findOne({
+
+            _id: { $ne: req.params.id },
+
+            $or: [
+
+                { studentId: req.body.studentId },
+
+                { studentEmail: req.body.studentEmail }
+
+            ]
+
+        });
+
+        if (duplicate) {
+
+            return res.status(400).json({
+
+                success: false,
+
+                message: "Student ID or Email already exists"
+
+            });
+
+        }
+
+        Object.assign(student, req.body);
+
+        await student.save();
+
+        res.status(200).json({
+
+            success: true,
+
+            message: "Student updated successfully.",
+
+            student
+
+        });
 
     }
 
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 
@@ -212,19 +283,21 @@ exports.updateStudent = async (req, res) => {
 
 };
 
-// ====================================
+// =======================================
 // Delete Student
-// ====================================
+// =======================================
 
 exports.deleteStudent = async (req, res) => {
 
     try {
 
-        const student = await Student.findByIdAndDelete(req.params.id);
+        const student = await Student.findById(req.params.id);
 
         if (!student) {
 
             return res.status(404).json({
+
+                success: false,
 
                 message: "Student not found"
 
@@ -232,9 +305,13 @@ exports.deleteStudent = async (req, res) => {
 
         }
 
+        await student.deleteOne();
+
         res.status(200).json({
 
-            message: "Student deleted successfully"
+            success: true,
+
+            message: "Student deleted successfully."
 
         });
 
@@ -243,6 +320,8 @@ exports.deleteStudent = async (req, res) => {
     catch (error) {
 
         res.status(500).json({
+
+            success: false,
 
             message: error.message
 

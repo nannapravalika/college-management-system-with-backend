@@ -5,9 +5,7 @@ const COURSE_API = `${BASE_URL}/courses`;
 const token = localStorage.getItem("token");
 
 if (!token) {
-
     window.location.href = "login.html";
-
 }
 
 const form = document.getElementById("studentForm");
@@ -20,6 +18,28 @@ const courseSelect = document.getElementById("course");
 let editingId = null;
 
 // =======================================
+// Common Unauthorized Handler
+// =======================================
+
+function handleUnauthorized(response) {
+
+    if (response.status === 401) {
+
+        localStorage.clear();
+
+        alert("Session Expired. Please login again.");
+
+        window.location.href = "login.html";
+
+        return true;
+
+    }
+
+    return false;
+
+}
+
+// =======================================
 // Load Departments
 // =======================================
 
@@ -30,29 +50,26 @@ async function loadDepartments() {
         const response = await fetch(DEPARTMENT_API, {
 
             headers: {
-
                 Authorization: `Bearer ${token}`
-
             }
 
         });
 
-        const departments = await response.json();
+        if (handleUnauthorized(response)) return;
 
-        departmentSelect.innerHTML = `
+        const data = await response.json();
 
-            <option value="">Select Department</option>
+        const departments = data.departments || data;
 
-        `;
+        departmentSelect.innerHTML =
+            `<option value="">Select Department</option>`;
 
         departments.forEach(department => {
 
             departmentSelect.innerHTML += `
 
                 <option value="${department._id}">
-
                     ${department.departmentName}
-
                 </option>
 
             `;
@@ -63,14 +80,16 @@ async function loadDepartments() {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load departments.");
 
     }
 
 }
 
 // =======================================
-// Load Courses Based On Department
+// Load Courses
 // =======================================
 
 departmentSelect.addEventListener("change", loadCourses);
@@ -79,21 +98,10 @@ async function loadCourses() {
 
     const departmentId = departmentSelect.value;
 
-    courseSelect.innerHTML = `
+    courseSelect.innerHTML =
+        `<option value="">Select Course</option>`;
 
-        <option value="">
-
-            Select Course
-
-        </option>
-
-    `;
-
-    if (!departmentId) {
-
-        return;
-
-    }
+    if (!departmentId) return;
 
     try {
 
@@ -113,16 +121,18 @@ async function loadCourses() {
 
         );
 
-        const courses = await response.json();
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        const courses = data.courses || data;
 
         courses.forEach(course => {
 
             courseSelect.innerHTML += `
 
                 <option value="${course._id}">
-
                     ${course.courseName}
-
                 </option>
 
             `;
@@ -133,7 +143,9 @@ async function loadCourses() {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load courses.");
 
     }
 
@@ -157,7 +169,11 @@ async function loadStudents() {
 
         });
 
-        const students = await response.json();
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        const students = data.students || data;
 
         displayStudents(students);
 
@@ -165,7 +181,9 @@ async function loadStudents() {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load students.");
 
     }
 
@@ -183,75 +201,63 @@ function displayStudents(students) {
 
     table.innerHTML = "";
 
-    if (students.length === 0) {
+    if (!students || students.length === 0) {
 
         table.innerHTML = `
-
-        <tr>
-
-            <td colspan="7">
-
-                No Students Found
-
-            </td>
-
-        </tr>
-
+            <tr>
+                <td colspan="7" style="text-align:center;">
+                    No Students Found
+                </td>
+            </tr>
         `;
 
         return;
-
     }
 
     students.forEach(student => {
 
         table.innerHTML += `
+            <tr>
 
-        <tr>
+                <td>${student.studentId}</td>
 
-            <td>${student.studentId}</td>
+                <td>${student.studentName}</td>
 
-            <td>${student.studentName}</td>
+                <td>${student.studentEmail}</td>
 
-            <td>${student.studentEmail}</td>
+                <td>${student.studentPhone}</td>
 
-            <td>${student.studentPhone}</td>
+                <td>${student.department?.departmentName || "-"}</td>
 
-            <td>${student.department.departmentName}</td>
+                <td>${student.course?.courseName || "-"}</td>
 
-            <td>${student.course.courseName}</td>
+                <td>
 
-            <td>
+                    <button
+                        class="edit-btn"
+                        onclick="editStudent('${student._id}')">
 
-                <button
+                        Edit
 
-                    class="edit-btn"
+                    </button>
 
-                    onclick="editStudent('${student._id}')">
+                    <button
+                        class="delete-btn"
+                        onclick="deleteStudent('${student._id}')">
 
-                    Edit
+                        Delete
 
-                </button>
+                    </button>
 
-                <button
+                </td>
 
-                    class="delete-btn"
-
-                    onclick="deleteStudent('${student._id}')">
-
-                    Delete
-
-                </button>
-
-            </td>
-
-        </tr>
-
+            </tr>
         `;
 
     });
 
 }
+
 // =======================================
 // Add / Update Student
 // =======================================
@@ -262,13 +268,13 @@ form.addEventListener("submit", async (e) => {
 
     const student = {
 
-        studentId: studentId.value,
+        studentId: studentId.value.trim(),
 
-        studentName: studentName.value,
+        studentName: studentName.value.trim(),
 
-        studentEmail: studentEmail.value,
+        studentEmail: studentEmail.value.trim(),
 
-        studentPhone: studentPhone.value,
+        studentPhone: studentPhone.value.trim(),
 
         department: departmentSelect.value,
 
@@ -276,85 +282,110 @@ form.addEventListener("submit", async (e) => {
 
     };
 
+    if (
+
+        !student.studentId ||
+
+        !student.studentName ||
+
+        !student.studentEmail ||
+
+        !student.studentPhone ||
+
+        !student.department ||
+
+        !student.course
+
+    ) {
+
+        alert("Please fill all fields.");
+
+        return;
+
+    }
+
+    const submitBtn = form.querySelector("button");
+
+    submitBtn.disabled = true;
+
+    submitBtn.innerText = editingId
+        ? "Updating..."
+        : "Saving...";
+
     try {
+
+        let response;
 
         if (editingId) {
 
-            const response = await fetch(`${STUDENT_API}/${editingId}`, {
+            response = await fetch(
 
-                method: "PUT",
+                `${STUDENT_API}/${editingId}`,
 
-                headers: {
+                {
 
-                    "Content-Type": "application/json",
+                    method: "PUT",
 
-                    Authorization: `Bearer ${token}`
+                    headers: {
 
-                },
+                        "Content-Type": "application/json",
 
-                body: JSON.stringify(student)
+                        Authorization: `Bearer ${token}`
 
-            });
+                    },
 
-            const data = await response.json();
+                    body: JSON.stringify(student)
 
-            if (!response.ok) {
+                }
 
-                alert(data.message);
+            );
 
-                return;
+        } else {
 
-            }
+            response = await fetch(
 
-            alert("Student Updated Successfully");
+                STUDENT_API,
 
-            editingId = null;
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type": "application/json",
+
+                        Authorization: `Bearer ${token}`
+
+                    },
+
+                    body: JSON.stringify(student)
+
+                }
+
+            );
+
+        }
+
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            alert(data.message);
+
+            return;
 
         }
 
-        else {
+        alert(data.message);
 
-            const response = await fetch(STUDENT_API, {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type": "application/json",
-
-                    Authorization: `Bearer ${token}`
-
-                },
-
-                body: JSON.stringify(student)
-
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-
-                alert(data.message);
-
-                return;
-
-            }
-
-            alert("Student Added Successfully");
-
-        }
+        editingId = null;
 
         form.reset();
 
-        courseSelect.innerHTML = `
-
-            <option value="">
-
-                Select Course
-
-            </option>
-
-        `;
+        courseSelect.innerHTML =
+            `<option value="">Select Course</option>`;
 
         loadStudents();
 
@@ -362,14 +393,21 @@ form.addEventListener("submit", async (e) => {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
 
         alert("Unable to connect to server.");
 
     }
 
-});
+    finally {
 
+        submitBtn.disabled = false;
+
+        submitBtn.innerText = "Save";
+
+    }
+
+});
 // =======================================
 // Edit Student
 // =======================================
@@ -381,30 +419,29 @@ async function editStudent(id) {
         const response = await fetch(`${STUDENT_API}/${id}`, {
 
             headers: {
-
                 Authorization: `Bearer ${token}`
-
             }
 
         });
 
-        const student = await response.json();
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        const student = data.student || data;
 
         editingId = student._id;
 
         studentId.value = student.studentId;
-
         studentName.value = student.studentName;
-
         studentEmail.value = student.studentEmail;
-
         studentPhone.value = student.studentPhone;
 
-        departmentSelect.value = student.department._id;
+        departmentSelect.value = student.department?._id || "";
 
         await loadCourses();
 
-        courseSelect.value = student.course._id;
+        courseSelect.value = student.course?._id || "";
 
         window.scrollTo({
 
@@ -418,7 +455,9 @@ async function editStudent(id) {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to load student details.");
 
     }
 
@@ -430,13 +469,9 @@ async function editStudent(id) {
 
 async function deleteStudent(id) {
 
-    const confirmDelete = confirm("Delete this student?");
+    const confirmDelete = confirm("Are you sure you want to delete this student?");
 
-    if (!confirmDelete) {
-
-        return;
-
-    }
+    if (!confirmDelete) return;
 
     try {
 
@@ -445,16 +480,16 @@ async function deleteStudent(id) {
             method: "DELETE",
 
             headers: {
-
                 Authorization: `Bearer ${token}`
-
             }
 
         });
 
+        if (handleUnauthorized(response)) return;
+
         const data = await response.json();
 
-        if (!response.ok) {
+        if (!response.ok || !data.success) {
 
             alert(data.message);
 
@@ -462,7 +497,7 @@ async function deleteStudent(id) {
 
         }
 
-        alert("Student Deleted Successfully");
+        alert(data.message);
 
         loadStudents();
 
@@ -470,69 +505,59 @@ async function deleteStudent(id) {
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Unable to delete student.");
 
     }
 
 }
+
 // =======================================
 // Search Students
 // =======================================
 
 search.addEventListener("keyup", async () => {
 
+    const keyword = search.value.trim();
+
     try {
 
-        const response = await fetch(STUDENT_API, {
+        const response = await fetch(
 
-            headers: {
+            `${STUDENT_API}?search=${encodeURIComponent(keyword)}`,
 
-                Authorization: `Bearer ${token}`
+            {
+
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
 
             }
 
-        });
-
-        const students = await response.json();
-
-        const keyword = search.value.toLowerCase().trim();
-
-        const filtered = students.filter(student =>
-
-            student.studentName.toLowerCase().includes(keyword)
-
-            ||
-
-            student.studentId.toLowerCase().includes(keyword)
-
-            ||
-
-            student.studentEmail.toLowerCase().includes(keyword)
-
-            ||
-
-            student.department.departmentName.toLowerCase().includes(keyword)
-
-            ||
-
-            student.course.courseName.toLowerCase().includes(keyword)
-
         );
 
-        displayStudents(filtered);
+        if (handleUnauthorized(response)) return;
+
+        const data = await response.json();
+
+        const students = data.students || data;
+
+        displayStudents(students);
 
     }
 
     catch (error) {
 
-        console.log(error);
+        console.error(error);
+
+        alert("Search failed.");
 
     }
 
 });
-
 // =======================================
-// Refresh Form
+// Reset Form
 // =======================================
 
 function resetForm() {
@@ -541,15 +566,13 @@ function resetForm() {
 
     editingId = null;
 
+    departmentSelect.value = "";
+
     courseSelect.innerHTML = `
-
-        <option value="">
-
-            Select Course
-
-        </option>
-
+        <option value="">Select Course</option>
     `;
+
+    studentId.focus();
 
 }
 
@@ -571,14 +594,58 @@ document.addEventListener("keydown", (event) => {
 // Auto Refresh Every 30 Seconds
 // =======================================
 
-setInterval(() => {
+let refreshInterval = setInterval(() => {
 
-    loadStudents();
+    if (document.visibilityState === "visible") {
+
+        loadStudents();
+
+    }
 
 }, 30000);
+
+// =======================================
+// Logout Helper
+// =======================================
+
+function logout() {
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("user");
+
+    window.location.href = "login.html";
+
+}
+
+// =======================================
+// Detect Expired Session
+// =======================================
+
+window.addEventListener("storage", (event) => {
+
+    if (event.key === "token" && !event.newValue) {
+
+        logout();
+
+    }
+
+});
+
+// =======================================
+// Prevent Form Resubmission
+// =======================================
+
+window.history.replaceState(null, null, window.location.href);
 
 // =======================================
 // Console
 // =======================================
 
-console.log("Student Management Loaded Successfully");
+console.log("=================================");
+console.log("Student Management Module Loaded");
+console.log("Authentication : Enabled");
+console.log("CRUD Operations : Enabled");
+console.log("Search : Enabled");
+console.log("Auto Refresh : Enabled");
+console.log("=================================");

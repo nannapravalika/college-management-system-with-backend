@@ -2,26 +2,61 @@ const express = require("express");
 
 const router = express.Router();
 
-const auth = require("../middleware/authMiddleware");
+const {
+    protect,
+    adminOnly,
+    facultyOrAdmin
+} = require("../middleware/authMiddleware");
 
 const {
-
-getStudents,
-getStudent,
-createStudent,
-updateStudent,
-deleteStudent
-
+    getStudents,
+    getStudent,
+    createStudent,
+    updateStudent,
+    deleteStudent
 } = require("../controllers/studentController");
 
-router.get("/", auth, getStudents);
+// =======================================
+// View Students (Admin + Faculty)
+// =======================================
 
-router.get("/:id", auth, getStudent);
+router.get(
+    "/",
+    protect,
+    facultyOrAdmin,
+    getStudents
+);
 
-router.post("/", auth, createStudent);
+router.get(
+    "/:id",
+    protect,
+    facultyOrAdmin,
+    getStudent
+);
 
-router.put("/:id", auth, updateStudent);
+// =======================================
+// Admin Only
+// =======================================
 
-router.delete("/:id", auth, deleteStudent);
+router.post(
+    "/",
+    protect,
+    adminOnly,
+    createStudent
+);
+
+router.put(
+    "/:id",
+    protect,
+    adminOnly,
+    updateStudent
+);
+
+router.delete(
+    "/:id",
+    protect,
+    adminOnly,
+    deleteStudent
+);
 
 module.exports = router;

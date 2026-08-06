@@ -2,39 +2,63 @@ const express = require("express");
 
 const router = express.Router();
 
-const auth = require("../middleware/authMiddleware");
+const {
+    protect,
+    adminOnly
+} = require("../middleware/authMiddleware");
 
 const {
-
     getCourses,
     getCourse,
     createCourse,
     updateCourse,
     deleteCourse,
     getCoursesByDepartment
-
 } = require("../controllers/courseController");
 
-// ==============================
-// Course Routes
-// ==============================
+// =====================================
+// Public Authenticated Routes
+// =====================================
 
 // Get All Courses
-router.get("/", auth, getCourses);
-
-// Get Single Course
-router.get("/:id", auth, getCourse);
+router.get("/", protect, getCourses);
 
 // Get Courses By Department
-router.get("/department/:departmentId", auth, getCoursesByDepartment);
+router.get(
+    "/department/:departmentId",
+    protect,
+    getCoursesByDepartment
+);
+
+// Get Single Course
+router.get("/:id", protect, getCourse);
+
+// =====================================
+// Admin Only Routes
+// =====================================
 
 // Create Course
-router.post("/", auth, createCourse);
+router.post(
+    "/",
+    protect,
+    adminOnly,
+    createCourse
+);
 
 // Update Course
-router.put("/:id", auth, updateCourse);
+router.put(
+    "/:id",
+    protect,
+    adminOnly,
+    updateCourse
+);
 
 // Delete Course
-router.delete("/:id", auth, deleteCourse);
+router.delete(
+    "/:id",
+    protect,
+    adminOnly,
+    deleteCourse
+);
 
 module.exports = router;
