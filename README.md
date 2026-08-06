@@ -124,14 +124,10 @@ college-management-system/
 │
 ├── css/
 ├── js/
-├── images/
+├── assets/
 │
+├── pages/
 ├── index.html
-├── login.html
-├── dashboard.html
-├── students.html
-├── departments.html
-├── courses.html
 │
 ├── package.json
 └── README.md
@@ -242,12 +238,6 @@ Each course belongs to:
 
 # ⚙️ Installation
 
-## Clone the Repository
-
-```bash
-git clone https://github.com/nannapravalika/college-management-system-with-backend.git
-```
-
 ---
 
 ## Navigate to Backend
@@ -302,18 +292,6 @@ The application automatically creates an administrator account using the `seedAd
 
 Use the credentials configured in your seed script to log in after the first server start.
 
----
-
-# 📷 Screenshots
-
-Add screenshots here before submitting:
-
-* Home Page
-* Login Page
-* Dashboard
-* Student Management
-* Department Management
-* Course Management
 
 ---
 
@@ -327,14 +305,6 @@ Add screenshots here before submitting:
 * Email Notifications
 * Role-Based Access Control for Faculty
 * Data Export to Excel
-
----
-
-# 👨‍💻 Author
-
-**Pravalika Nanna**
-
-Bachelor of Technology (Computer Science & Engineering)
 
 ---
 
