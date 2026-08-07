@@ -19,11 +19,11 @@ const seedAdmin = async () => {
                 role: "admin"
             });
 
-            console.log("✅ Default Admin Created");
+            console.log("Default Admin Created");
 
         } else {
 
-            console.log("✅ Admin Already Exists");
+            console.log("Admin Already Exists");
 
         }
 
