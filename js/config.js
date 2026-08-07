@@ -1,31 +1,19 @@
-/* ==========================================
-   API Configuration
-========================================== */
+const hostname = window.location.hostname;
 
-const BASE_URL = (() => {
+let BASE_URL;
 
-    const hostname = window.location.hostname;
+if (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1"
+) {
 
-    // Running on Localhost
-    if (
-        hostname === "localhost" ||
-        hostname === "127.0.0.1"
-    ) {
+    BASE_URL = "http://localhost:5000/api";
 
-        return "http://localhost:5000/api";
+}
+else {
 
-    }
+    BASE_URL = `${window.location.origin}/api`;
 
-    // Running inside GitHub Codespaces
-    if (hostname.includes("github.dev")) {
-
-        return `${window.location.origin}/api`;
-
-    }
-
-    // Fallback
-    return "http://localhost:5000/api";
-
-})();
+}
 
 console.log("API:", BASE_URL);
